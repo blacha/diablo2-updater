@@ -1,0 +1,13 @@
+{
+  "name": "update-pod",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "ansi-colors": "^4.1.1",
+    "crc": "^3.8.0",
+    "node-fetch": "^2.6.1",
+    "pino": "^6.11.1",
+    "pretty-json-log": "^0.3.2"
+  }
+}
