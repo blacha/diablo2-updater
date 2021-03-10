@@ -36,7 +36,11 @@ async function main() {
     log.info({ bytes: data.length }, 'FileList:Fetch:Done');
     const lines = data.split('\n').map(c => c.trim());
     const files = lines.filter(f => f.startsWith('<file') && f.includes('crc'));
-    const links = lines.filter(f => f.startsWith('<link')).map(c => c.replace('<link>', '').replace('</link>', '').replace(/%20/g, ' '))
+    const links = lines.filter(f => f.startsWith('<link')).map(c => {
+        const line = c.replace('<link>', '').replace('</link>', '').replace(/%20/g, ' ')
+        if (line.startsWith('http')) return line;
+        return line.slice(line.indexOf('http'))
+    })
     
     for (const file of files) {
         const fileName = extractKeyValue(file, 'name');
@@ -60,7 +64,7 @@ async function main() {
 
         }
 
-        log.info({ fileName, currentCrc, expectedCrc, }, 'File:Update')
+        log.info({ fileName, currentCrc, expectedCrc, downloadLinks }, 'File:Update')
         const fileRes = await fetch(downloadLinks)
         if (!fileRes.ok) {
             log.error('File:Update:Failed');
