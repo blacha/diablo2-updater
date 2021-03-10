@@ -6,8 +6,20 @@ const path = require('path')
 const fetch = require('node-fetch');
 const { crc32 } = require('crc');
 
-const D2Path = path.resolve(path.join(__dirname, '../DiabloII'));
-const PodPath = path.join(D2Path, 'Path of Diablo');
+const PathOfDiablo = 'Path of Diablo'
+
+function getDiabloPath() {
+    const diablo2Path = process.env.DIABLO2_PATH;
+    if (diablo2Path == null) throw new Error('$DIABLO2_PATH is not set')
+    if (diablo2Path.endsWith(PathOfDiablo) || diablo2Path.endsWith(PathOfDiablo + path.sep)) return diablo2Path;
+    
+   const podPath =  path.join(diablo2Path, 'Path of Diablo');
+   if (fs.existsSync(podPath)) return podPath;
+   throw new Error('Path does not exist:' + podPath);
+}
+
+const Diablo2Path = getDiabloPath();
+
 
 const FileSkip = new Set(['ddraw.dll'])
 
@@ -21,10 +33,6 @@ function extractKeyValue(text, key) {
     return text.slice(keyStart, keyEnd)
 }
 async function main() {
-    if (!fs.existsSync(PodPath)) {
-        log.error({ path: PodPath }, 'Failed to find PoD');
-        return;
-    }
     log.info('FileList:Fetch')
     const res = await fetch('https://raw.githubusercontent.com/GreenDude120/PoD-Launcher/master/files.xml');
     if (!res.ok) {
@@ -47,7 +55,7 @@ async function main() {
         const expectedCrc = extractKeyValue(file, 'crc').toLowerCase();
         const downloadLinks = links.find(f => f.endsWith(fileName));
    
-        const targetFile = path.join(PodPath, fileName);
+        const targetFile = path.join(Diablo2Path, fileName);
         if (!fs.existsSync(targetFile)) {
             log.warn({ fileName }, 'File:Missing')
             await updateFile(fileName)
